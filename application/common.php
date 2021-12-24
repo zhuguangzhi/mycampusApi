@@ -64,51 +64,6 @@ function http_request($url,$data = null,$headers=array()){
 function createToken(){
     return toMd5(uniqid(microtime(true)));
 }
-// 获取学生信息
-function getStudent($studentId){
-    $res=\app\common\model\StudentList::where('s_id',$studentId)->with([
-        'ClassList'=>function($query){
-            return $query->field('id,name,coures_id,d_id,teacher_id');
-        },
-    ])->field('id,class_id,name,sex,mobile,is_login')->find();
-    //        查找所在系
-    $DepartId = $res['class_list']['d_id'];
-    $DepartInfo = Model('DepartList')->getDepartInfo($DepartId);
-//        查找班主任信息
-    $headmasterId = $res['class_list']['teacher_id'];
-    $headmasterInfo =Model('TeacherList')->getTeacherInfo($headmasterId);
 
-    $res['class_list']['headmaster']=$headmasterInfo;
-    $res['class_list']['depart'] = $DepartInfo;
-//        删除多余字段
-    unset($res['class_id'], $res['class_list']['d_id'],$res['class_list']['teacher_id']);
-    $res['userId']=$studentId;
-//        生成token
-    $token = createToken();
-    $res['token'] = $token;
-    $res['isTeacher'] = false;
-    //        缓存token
-    setCache('userInfo',$res,0);
-    return $res;
-}
-// 获取教师相关信息
-function getTeacher($teacherId){
-    $res = \app\common\model\TeacherList::where(['t_id'=>$teacherId ])->with([
-        'DepartList'=>function($query){
-            return $query->field('id,d_name,t_id');
-        }
-    ])->field('id,d_id,name,sex,mobile,is_login,rank')->find();
-//        查找系主任信息
-    $headmasterId = $res['depart_list']['t_id'];
-    $headmasterInfo = model('TeacherList')->getTeacherInfo($headmasterId);
-    $res['depart_list']['secretary']=$headmasterInfo;
-    unset($res['d_id'], $res['depart_list']['t_id']);
-    $res['userId']=$teacherId;
-//        生成token
-    $token = createToken();
-    $res['token'] = $token;
-    $res['isTeacher'] = true;
-    setCache('userInfo',$res,0);
-    return $res;
-}
+
 

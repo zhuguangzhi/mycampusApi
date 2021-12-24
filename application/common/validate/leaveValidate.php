@@ -6,16 +6,16 @@ class leaveValidate extends BaseValidate
 {
     protected $rule =[
         'userId'       => 'require',
-        'leaveType'    => 'require',
-        'leaveReason'  => 'require',
-        'mobile'       => 'require|mobile',
-        'parentMobile' => 'require|mobile',
+        'leave_type'    => 'require',
+        'leave_reason'  => 'require',
+        'student_mobile'       => 'require|mobile',
+        'parent_mobile' => 'require|mobile',
         'startTime'    => 'require|number',
         'endTime'      => 'require|number',
-        'place'        => 'require',
-        'leaveHours'   => 'require'
-
-
+        'to_place'        => 'require',
+        'leave_time'   => 'require',
+        'page'         => 'require|integer',
+        'leaveId'      => 'require|integer'
     ];
 
     protected $message=[
@@ -32,14 +32,16 @@ class leaveValidate extends BaseValidate
 
     protected $scene=[
         'leaveForm' => [
-            'leaveType',
-            'leaveReason',
-            'mobile',
-            'parentMobile',
+            'leave_type',
+            'leave_reason',
+            'student_mobile',
+            'parent_mobile',
             'startTime',
             'endTime',
-            'place'   ,
-            'leaveHours'
-        ]
+            'to_place'   ,
+            'leave_time'
+        ],
+        'page' => ['page'],
+        'leaveId' => ['leaveId'],
     ];
 }

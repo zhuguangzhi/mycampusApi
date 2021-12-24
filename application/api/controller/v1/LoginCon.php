@@ -3,19 +3,20 @@
 namespace app\api\controller\v1;
 
 use app\common\controller\BaseController;
+use app\common\model\BindId;
 use app\common\model\BindId as BindIdModel;
 use app\common\model\StudentList as StudentModel;
 use app\common\model\TeacherList as TeacherModel;
 use app\common\validate\UserValidate;
+use think\Model;
 use think\Request;
 
-class Login extends BaseController
+class LoginCon extends BaseController
 {
     public function login(Request $request)
     {
         (new UserValidate())->goCheck('UserLogin');
         $params = $request->param();
-
         if ($params['userId'][0] === "t"){
 //            教师登录
             $data=(new TeacherModel)->login();
@@ -23,17 +24,11 @@ class Login extends BaseController
 //            学生登录
             $data = (new StudentModel)->login();
         }
+        $info = (new BindIdModel())->checkOpenId();
+        $data['openId']=$info;
+//        校验OpenId
         return self::showResCode('登录成功',$data);
 
-    }
-    public function checkToken(Request $request){
-
-        (new UserValidate())->goCheck('checkToken');
-        $CacheToken = getCache('userInfo');
-        if ((string)$CacheToken['token']===(string)$request->param()['token']) {
-            return self::showResCodeWithOutData('token验证成功');
-        }
-        TApiException('口令验证失败，请重新登录');
     }
 //    token登录
     public function tokenLogin(Request $request){
@@ -41,10 +36,11 @@ class Login extends BaseController
         $userInfo = getCache('userInfo');
         $isTeacher = $userInfo['isTeacher'];
         if ($isTeacher){
-            $res=getTeacher($userInfo['userId']);
+            $res=\model('TeacherList')->getTeacher($userInfo['userId']);
         }else{
-            $res = getStudent($userInfo['userId']);
+            $res =\model('StudentList')->getStudent($userInfo['userId']);
         }
+        setCache('userInfo',$res,0);
         return self::showResCode("登录成功",$res);
     }
 //    绑定openId
@@ -63,9 +59,29 @@ class Login extends BaseController
         $data = (new BindIdModel())->getOpenId();
         return self::showResCode('openId',['checkResult'=>$data]);
     }
-//    获取OpenID相关信息
-    public function getBindNum(){
-        $data = (new BindIdModel())->getBindNum();
-        return self::showResCode('openIdInfo',$data);
+//校验密码
+    public function checkPassword(Request $request){
+        $params = $request->param();
+        if ($params['userId'][0] === "t"){
+//            教师验证
+            (new TeacherModel)->login(true);
+        }else{
+//            学生验证
+            (new StudentModel)->login(true);
+        }
+        return self::showResCode('校验成功',true);
+    }
+//    修改密码
+    public function revisePassword(Request $request){
+        $params = $request->param();
+
+        if ($params['userId'][0] === "t"){
+//            教师验证
+            (new TeacherModel)->revisePassword();
+        }else{
+//            学生验证
+            (new StudentModel)->revisePassword();
+        }
+        return self::showResCode('修改成功',true);
     }
 }

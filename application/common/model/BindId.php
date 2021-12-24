@@ -47,8 +47,8 @@ class BindId extends Model {
         return(['deadline'=>$date,'bindNum'=>$res->time,'time'=>$res->record_time]);
     }
 
-//    获取OpenId
-    public function getOpenId(){
+    //   检验openId
+    public function checkOpenId(){
         $params = request()->param();
         $option = [
             'appid'      =>  config('user.appId'),
@@ -58,29 +58,18 @@ class BindId extends Model {
         ];
         $res = json_decode(http_request('https://api.weixin.qq.com/sns/jscode2session',$option));
         $openId = toMd5($res->openid);
-//        判断是否有openId
-        $dbRes = $this->where('userId',$params['userId'])->find();
-        if (!empty($dbRes)){
-//            有
-            return $this->checkOpenId($params['userId'],$params['systemId'],$openId);
-        }
-//        没有，创建
-        $this->save(['userId'=>$params['userId'],'model'=>$params['systemId'],'openId'=>$openId]);
-        return true;
-    }
+        $info = $this->where('userId',$params['userId'])->field('openId,model')->find();
 
-
-    //   检验openId
-    public function checkOpenId($userId,$systemId,$openId){
-        $info = $this->where('userId',$userId)->field('openId,model')->find();
-        if ($info['openId'] === $openId &&  $info['model'] === $systemId){
+        if ($info['openId'] === $openId &&  $info['model'] === $params['systemId']){
+//            通過
             return true;
         }
 
         $params = [
             "openId" => $openId,
-            "model" => $systemId
+            "model" => $params['systemId']
         ];
+//        将前端传入的值存储
         setCache('openInfo',$params,60000);
         return false;
     }

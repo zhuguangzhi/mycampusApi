@@ -10,6 +10,8 @@
             'password' => 'require',
             'token' =>'require',
             'openId'=>'require',
+            'systemId' => 'require',
+            'code' => 'require'
         ];
 
         protected $message=[
@@ -21,5 +23,6 @@
             'UserLogin' => ['userId','password'],
             'checkToken'=> ['token'],
             'openId'=>['openId','userId'],
+
         ];
     }
