@@ -6,7 +6,7 @@ use think\Model;
 class StudentList extends Model{
     //        自动写入时间
     protected $autoWriteTimestamp =true;
-//    关联教室表
+//    关联班级表
     public function ClassList ()
     {
         return $this->belongsTo('ClassList','class_id','id');
@@ -37,7 +37,7 @@ class StudentList extends Model{
             $studentInfo['bindInfo']=$openInfo;
         }
         //        缓存token
-        setCache('userInfo',$studentInfo,0);
+        setCache($userId,$studentInfo,0);
 
         return $studentInfo;
     }

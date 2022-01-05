@@ -13,17 +13,17 @@ class UserAuth
     public function handle($request, \Closure $next)
     {
         //获取头部信息
-        $params = $request->header();
+        $header = $request->header();
 //        若没有token相关信息
-        if (!array_key_exists('token', $params))
+        if (!array_key_exists('token', $header))
             TApiException('验证失败，请重新登录', 200, 40003);
-
-//        当前用户是否登录
-        $user = getCache('userInfo');
-
+//        获取用户传进的userId
+        $userId = $request->param()['userId'];
+//        获取当前用户token
+        $user = getCache($userId);
 //        验证失败（未登录或已过期）
         //        验证token
-        if (!$user || $params['token']!==$user['token']) TApiException('验证失败，请重新登录', 200, 40003);
+        if (!$user || $header['token']!==$user['token']) TApiException('验证失败，请重新登录', 200, 40003);
 
 //        将用户信息存储在request中
         $request->userInfo = $user;

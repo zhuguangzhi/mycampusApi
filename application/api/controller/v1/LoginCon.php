@@ -33,31 +33,20 @@ class LoginCon extends BaseController
 //    token登录
     public function tokenLogin(Request $request){
 //        中间件中已经验证token是否正确
-        $userInfo = getCache('userInfo');
-        $isTeacher = $userInfo['isTeacher'];
+        $userId = $request->param()['userId'];
+        $isTeacher = getCache($userId)['isTeacher'];
         if ($isTeacher){
-            $res=\model('TeacherList')->getTeacher($userInfo['userId']);
+            $res=\model('TeacherList')->getTeacher($userId);
         }else{
-            $res =\model('StudentList')->getStudent($userInfo['userId']);
+            $res =\model('StudentList')->getStudent($userId);
         }
-        setCache('userInfo',$res,0);
+        setCache($userId,$res,0);
         return self::showResCode("登录成功",$res);
     }
 //    绑定openId
     public function bindOpenId(){
         (new BindIdModel())->bindId();
         return self::showResCodeWithOutData('绑定成功',200);
-    }
-//    检查openId
-    public function checkOpenId(){
-        (new UserValidate())->goCheck('openId');
-        $data=(new BindIdModel())->checkOpenId();
-        return self::showResCode('校验',['checkResult'=>$data]);
-    }
-//    获取openId
-    public function getOpenId(){
-        $data = (new BindIdModel())->getOpenId();
-        return self::showResCode('openId',['checkResult'=>$data]);
     }
 //校验密码
     public function checkPassword(Request $request){

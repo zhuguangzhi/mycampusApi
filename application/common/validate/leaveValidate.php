@@ -15,7 +15,8 @@ class leaveValidate extends BaseValidate
         'to_place'        => 'require',
         'leave_time'   => 'require',
         'page'         => 'require|integer',
-        'leaveId'      => 'require|integer'
+        'leaveId'      => 'require|integer',
+        'approveResult' => 'require',
     ];
 
     protected $message=[
@@ -43,5 +44,6 @@ class leaveValidate extends BaseValidate
         ],
         'page' => ['page'],
         'leaveId' => ['leaveId'],
+        'approve' => ['approveResult','leaveId']
     ];
 }

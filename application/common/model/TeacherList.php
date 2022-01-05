@@ -32,7 +32,7 @@ class TeacherList extends Model
         }else {
             $teacherInfo['bindInfo']=$openInfo;
         }
-        setCache('userInfo',$teacherInfo,0);
+        setCache($userId,$teacherInfo,0);
         return $teacherInfo;
     }
 //    查找教师基本信息

@@ -11,10 +11,22 @@ class BindId extends Model {
     public function bindId (){
 //        获取次数
         $res = $this->getBindNum();
+        $today = Carbon::today()->timestamp;
+        $userId = request()->param()['userId'];
+        $openInfo = getCache('openInfo');
 //        判断用户是否绑定过
         if(empty($res)){
-            $num = 4;
+            $num = 3;
+            $this->save([
+                'userId' => $userId,
+                "openId" => $openInfo['openId'],
+                "model" => $openInfo['model'],
+                "time" => $num,
+                "record_time" => $today
+            ]);
+            return false;
         }else {
+//            重新绑定
             $num = (int)$res['bindNum'];
             $time = Carbon::parse($res['deadline'])->timestamp;
             //        判断时间是否到了
@@ -23,12 +35,12 @@ class BindId extends Model {
             }
             if ($num < 1){
                 TApiException('本年内修改次数已达上限',400,'1004');
+            }else{
+//                还有次数，时间为上次时间
+                $today=$time;
             }
         }
         $num -= 1;
-        $today = Carbon::today()->timestamp;
-        $userId = request()->param()['userId'];
-        $openInfo = getCache('openInfo');
         $this->where('userId',$userId)->update([
             "openId" => $openInfo['openId'],
             "model" => $openInfo['model'],
@@ -57,14 +69,12 @@ class BindId extends Model {
             'grant_type' =>  'authorization_code'
         ];
         $res = json_decode(http_request('https://api.weixin.qq.com/sns/jscode2session',$option));
-        $openId = toMd5($res->openid);
+        $openId = $res->openid;
         $info = $this->where('userId',$params['userId'])->field('openId,model')->find();
-
         if ($info['openId'] === $openId &&  $info['model'] === $params['systemId']){
 //            通過
             return true;
         }
-
         $params = [
             "openId" => $openId,
             "model" => $params['systemId']
